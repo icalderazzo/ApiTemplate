@@ -1,7 +1,7 @@
 # ApiTemplate
 .Net Core Web api template using Dapper ORM
 
-## Architecturehttps
+## Architecture
 
 This is an api template following clean architecture pattern. This architecture is based on Microsoft's dotnet 6 conference: https://www.youtube.com/watch?v=lkmvnjypENw.
 This is the template I personally follow for personal projects.
