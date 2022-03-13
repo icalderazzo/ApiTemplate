@@ -25,7 +25,17 @@ namespace Core.Services
             }
         }
 
+        public Task CreateAsync(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
         public void Delete(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteAsync(int id)
         {
             throw new NotImplementedException();
         }
@@ -42,6 +52,11 @@ namespace Core.Services
             }
         }
 
+        public Task<List<T>> GetAllAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual T GetById(int id)
         {
             try
@@ -52,6 +67,11 @@ namespace Core.Services
             {
                 throw;
             }
+        }
+
+        public Task<T> GetByIdAsync(int id)
+        {
+            throw new NotImplementedException();
         }
 
         public virtual void Update(T entity)
@@ -65,6 +85,11 @@ namespace Core.Services
             {
                 throw;
             }
+        }
+
+        public Task UpdateAsync(T entity)
+        {
+            throw new NotImplementedException();
         }
     }
 }

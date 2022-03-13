@@ -15,11 +15,11 @@ namespace WebApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(T model)
+        public async Task<IActionResult> Create(T model)
         {
             try
             {
-                _service.Create(model);
+                await _service.CreateAsync(model);
                 return Ok();
             }
             catch (Exception e)
@@ -29,11 +29,11 @@ namespace WebApi.Controllers
         }
 
         [HttpPut]
-        public IActionResult Update(T model)
+        public async Task<IActionResult> Update(T model)
         {
             try
             {
-                _service.Update(model);
+                await _service.UpdateAsync(model);
                 return Ok();
             }
             catch (Exception e)
@@ -43,11 +43,11 @@ namespace WebApi.Controllers
         }
 
         [HttpPost("{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                _service.Delete(id);
+                await _service.DeleteAsync(id);
                 return Ok();
             }
             catch (Exception e)
@@ -57,11 +57,12 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<T> Get(int id)
+        public async Task<ActionResult<T>> Get(int id)
         {
             try
             {
-                return Ok(_service.GetById(id));
+                var result = await _service.GetByIdAsync(id);
+                return Ok(result);
             }
             catch (Exception e)
             {
@@ -70,11 +71,12 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<T>> GetAll()
+        public async Task<ActionResult<List<T>>> GetAll()
         {
             try
             {
-                return Ok(_service.GetAll());
+                var result = await _service.GetAllAsync();
+                return Ok(result);
             }
             catch (Exception e)
             {
