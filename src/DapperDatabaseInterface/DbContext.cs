@@ -70,6 +70,30 @@ namespace DapperDatabaseInterface
             }
         }
 
+        public async Task<ICollection<T>> GetAsync<T>(string query, object? parameters = null)
+        {
+            try
+            {
+                if (_connection != null)
+                {
+                    var result = await _connection.QueryAsync<T>(query, parameters);
+                    return result.ToList(); 
+                }
+                else
+                {
+                    using (IDbConnection conn = new SqlConnection(_connectionString))
+                    {
+                        var dbResult = await conn.QueryAsync<T>(query, parameters);
+                        return dbResult.ToList();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
         public void SaveChanges()
         {
             try
@@ -93,6 +117,36 @@ namespace DapperDatabaseInterface
                     _currentTransacction.Rollback();
                 }
                 throw;
+            }
+            finally
+            {
+                Reset();
+            }
+        }
+
+        public async Task SaveChangesAsync()
+        {
+            try
+            {
+                if (_connection == null)
+                {
+                    _connection = new SqlConnection(_connectionString);
+                    _connection.Open();
+                    _currentTransacction = _connection.BeginTransaction();
+                }
+                foreach (var data in _dataToSave)
+                {
+                    await _currentTransacction.Connection.ExecuteAsync(data.Item1, data.Item2, transaction: _currentTransacction);
+                }
+                _currentTransacction.Commit();   
+            }
+            catch (Exception)
+            {
+                if (_currentTransacction != null)
+                {
+                    _currentTransacction.Rollback();
+                }
+                throw;             
             }
             finally
             {

@@ -27,12 +27,37 @@ namespace Repositories
             }
         }
 
+        public Task<T> CreateAsync(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Delete(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task DeleteAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual List<T> GetAll()
         {
             throw new NotImplementedException();
         }
 
+        public Task<List<T>> GetAllAsync()
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual T GetById(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> GetByIdAsync(int id)
         {
             throw new NotImplementedException();
         }
@@ -49,7 +74,24 @@ namespace Repositories
             }
         }
 
+        public async Task SaveChangesAsync()
+        {
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+        }
+
         public virtual T Update(T entity)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<T> UpdateAsync(T entity)
         {
             throw new NotImplementedException();
         }

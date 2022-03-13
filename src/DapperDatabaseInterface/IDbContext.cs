@@ -16,6 +16,8 @@ namespace DapperDatabaseInterface
         /// <returns></returns>
         ICollection<T> Get<T>(string query, object? parameters = null);
 
+        Task<ICollection<T>> GetAsync<T>(string query, object? parameters = null);
+
         /// <summary>
         /// Stores data locally in the database context.
         /// </summary>
@@ -37,5 +39,7 @@ namespace DapperDatabaseInterface
         /// stored data to the database.
         /// </summary>
         void SaveChanges();
+
+        Task SaveChangesAsync();
     }
 }
