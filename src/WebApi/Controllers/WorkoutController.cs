@@ -8,7 +8,8 @@ namespace WebApi.Controllers
         private readonly IWorkoutService _workoutService;
 
         public WorkoutController(
-            IWorkoutService workoutService) : base(workoutService)
+            IWorkoutService workoutService,
+            ILogger<Workout> logger) : base(workoutService, logger)
         {
             _workoutService = workoutService;
         }

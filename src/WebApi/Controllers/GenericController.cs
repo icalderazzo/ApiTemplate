@@ -8,10 +8,14 @@ namespace WebApi.Controllers
     public class GenericController<T> : ControllerBase
     {
         protected readonly IService<T> _service;
+        protected ILogger<T> _logger;
 
-        public GenericController(IService<T> service)
+        public GenericController(
+            IService<T> service,
+            ILogger<T> logger)
         {
             _service = service;
+            _logger = logger;
         }
 
         [HttpPost]
