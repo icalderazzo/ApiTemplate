@@ -1,5 +1,5 @@
 # ApiTemplate
-.Net Core Web api template using Dapper ORM
+.Net Core Web api template using Dapper Micro ORM
 
 ## Architecture
 
