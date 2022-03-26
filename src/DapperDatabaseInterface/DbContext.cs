@@ -13,9 +13,9 @@ namespace DapperDatabaseInterface
         /// <summary>
         /// List of tuples which stores data to be saved.
         /// Item1: the sql query
-        /// Item2: data to be saves (or query parameters)
+        /// Item2: data to be saved (or query parameters)
         /// </summary>
-        private List<(string, object)> _dataToSave;
+        private List<(string, object?)> _dataToSave;
 
         public DbContext(string connectionString)
         {
@@ -25,6 +25,9 @@ namespace DapperDatabaseInterface
 
         public void Add<T>(string sql, T data)
         {
+            if (data == null)
+                throw new NullReferenceException();
+
             _dataToSave.Add((sql, data));
         }
 
@@ -45,6 +48,11 @@ namespace DapperDatabaseInterface
                 }
                 throw;
             }
+        }
+
+        public void Delete(string sql, object? parameters = null)
+        {
+            _dataToSave.Add((sql, parameters));
         }
 
         public ICollection<T> Get<T>(string query, object? parameters = null)
@@ -152,6 +160,14 @@ namespace DapperDatabaseInterface
             {
                 Reset();
             }
+        }
+
+        public void Update<T>(string sql, T data)
+        {
+            if (data == null)
+                throw new NullReferenceException();
+
+            _dataToSave.Add((sql, data));
         }
 
         /// <summary>
