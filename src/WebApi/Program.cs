@@ -1,13 +1,11 @@
-using Core.Interfaces.Infrastructure.Repositories;
-using Core.Interfaces.Services;
-using Core.Services;
-using DapperDatabaseInterface;
-using Repositories;
 using Serilog;
+using WebApi.Extensions.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+// Logger
 var logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
@@ -15,21 +13,19 @@ var logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
+// Default api config
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Database config
-builder.Services.AddScoped<IDbContext>(c => ContextBuilder.Build(builder.Configuration.GetConnectionString("Testing")));
+builder.Services.AddDapperDatabaseInterface(
+    connectionString: builder.Configuration.GetConnectionString("Testing")
+);
 
-//Container config
-#region Repositories
-builder.Services.AddTransient<IWorkoutRepository, WorkoutRepository>();
-#endregion
-#region Services
-builder.Services.AddTransient<IWorkoutService, WorkoutService>();
-#endregion
+// Core services and repositories
+builder.Services.AddCoreServices();
+builder.Services.AddRepositories();
 
 var app = builder.Build();
 
