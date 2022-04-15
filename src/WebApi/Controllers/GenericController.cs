@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/[Action]")]
+    [Route("api/[controller]")]
     public class GenericController<T> : ControllerBase
     {
         protected readonly IService<T> _service;
@@ -24,7 +24,7 @@ namespace WebApi.Controllers
             try
             {
                 await _service.CreateAsync(model);
-                return Ok();
+                return Created("", model);
             }
             catch (Exception e)
             {
@@ -32,11 +32,14 @@ namespace WebApi.Controllers
             }
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Update(T model)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, T model)
         {
             try
             {
+                var entity = await _service.GetByIdAsync(id);
+                if(entity == null) return NotFound();
+
                 await _service.UpdateAsync(model);
                 return Ok();
             }
@@ -46,11 +49,31 @@ namespace WebApi.Controllers
             }
         }
 
-        [HttpPost("{id}")]
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdatePartial(int id, T model)
+        {
+            try
+            {
+                var entity = await _service.GetByIdAsync(id);
+                if(entity == null) return NotFound();
+
+                await _service.UpdateAsync(model);
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);   
+            }
+        }
+
+        [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
+                var entity = await _service.GetByIdAsync(id);
+                if(entity == null) return NotFound();
+
                 await _service.DeleteAsync(id);
                 return Ok();
             }
@@ -66,6 +89,9 @@ namespace WebApi.Controllers
             try
             {
                 var result = await _service.GetByIdAsync(id);
+                
+                if(result == null) return NotFound();
+
                 return Ok(result);
             }
             catch (Exception e)
