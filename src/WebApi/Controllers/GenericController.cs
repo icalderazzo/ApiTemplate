@@ -1,25 +1,33 @@
-﻿using Core.Interfaces.Services;
+﻿using AutoMapper;
+using Core.Domain;
+using Core.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
+using WebApi.Contracts.Responses;
 
 namespace WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class GenericController<T> : ControllerBase
+    public class GenericController<TDomain, TResponse> : ControllerBase 
+        where TDomain : BaseModel 
+        where TResponse : BaseResponse 
     {
-        protected readonly IService<T> _service;
-        protected ILogger<T> _logger;
+        protected readonly IService<TDomain> _service;
+        protected ILogger<TDomain> _logger;
+        protected IMapper _mapper;
 
         public GenericController(
-            IService<T> service,
-            ILogger<T> logger)
+            IService<TDomain> service,
+            ILogger<TDomain> logger,
+            IMapper mapper)
         {
             _service = service;
             _logger = logger;
+            _mapper = mapper;
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(T model)
+        public async Task<IActionResult> Create(TDomain model)
         {
             try
             {
@@ -33,7 +41,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, T model)
+        public async Task<IActionResult> Update(int id, TDomain model)
         {
             try
             {
@@ -50,7 +58,7 @@ namespace WebApi.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdatePartial(int id, T model)
+        public async Task<IActionResult> UpdatePartial(int id, TDomain model)
         {
             try
             {
@@ -84,7 +92,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<T>> Get(int id)
+        public async Task<ActionResult<TDomain>> Get(int id)
         {
             try
             {
@@ -92,7 +100,7 @@ namespace WebApi.Controllers
                 
                 if(result == null) return NotFound();
 
-                return Ok(result);
+                return Ok(_mapper.Map<TResponse>(result));
             }
             catch (Exception e)
             {
@@ -101,12 +109,12 @@ namespace WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<T>>> GetAll()
+        public async Task<ActionResult<List<TDomain>>> GetAll()
         {
             try
             {
                 var result = await _service.GetAllAsync();
-                return Ok(result);
+                return Ok(_mapper.Map<List<TResponse>>(result));
             }
             catch (Exception e)
             {

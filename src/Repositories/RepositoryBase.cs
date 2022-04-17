@@ -47,7 +47,7 @@ namespace Repositories
             throw new NotImplementedException();
         }
 
-        public Task<List<T>> GetAllAsync()
+        public virtual Task<List<T>> GetAllAsync()
         {
             throw new NotImplementedException();
         }

@@ -13,6 +13,9 @@ var logger = new LoggerConfiguration()
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
 
+// Mapper
+builder.Services.AddAutoMapper(typeof(Program));
+
 // Default api config
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
