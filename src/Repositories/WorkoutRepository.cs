@@ -1,5 +1,5 @@
-﻿using Core.Interfaces.Infrastructure.Repositories;
-using Core.Model;
+﻿using Core.Domain;
+using Core.Interfaces.Infrastructure.Repositories;
 using DapperDatabaseInterface;
 
 namespace Repositories

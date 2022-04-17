@@ -1,7 +1,7 @@
 ﻿
-namespace Core.Model
+namespace Core.Domain
 {
-    public class Exercise
+    public class Exercise : BaseModel
     {
         public int Id { get; set; }
         public string Name { get; set; }
