@@ -2,186 +2,170 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 
-namespace DapperDatabaseInterface
+namespace DapperDatabaseInterface;
+
+public class DbContext : IDbContext
 {
-    public class DbContext : IDbContext
+    private readonly string _connectionString;
+    private IDbConnection? _connection;
+    private IDbTransaction? _currentTransacction;
+
+    /// <summary>
+    /// List of tuples which stores data to be saved.
+    /// Item1: the sql query
+    /// Item2: data to be saved (or query parameters)
+    /// </summary>
+    private readonly List<(string, object?)> _dataToSave;
+
+    public DbContext(string connectionString)
     {
-        private readonly string _connectionString;
-        private IDbConnection? _connection;
-        private IDbTransaction? _currentTransacction;
+        _connectionString = connectionString;
+        _dataToSave = new List<(string, object?)>();
+    }
 
-        /// <summary>
-        /// List of tuples which stores data to be saved.
-        /// Item1: the sql query
-        /// Item2: data to be saved (or query parameters)
-        /// </summary>
-        private List<(string, object?)> _dataToSave;
+    public void Add<T>(string sql, T data)
+    {
+        if (data == null)
+            throw new NullReferenceException();
 
-        public DbContext(string connectionString)
+        _dataToSave.Add((sql, data));
+    }
+
+    public void Add(string sql, DynamicParameters parameters)
+    {
+        try
         {
-            _connectionString = connectionString;
-            _dataToSave = new();
+            _connection = new SqlConnection(_connectionString);
+            _connection.Open();
+            _currentTransacction = _connection.BeginTransaction();
+            _connection.Execute(sql, parameters, _currentTransacction);
         }
-
-        public void Add<T>(string sql, T data)
+        catch (Exception)
         {
-            if (data == null)
-                throw new NullReferenceException();
-
-            _dataToSave.Add((sql, data));
+            _currentTransacction?.Rollback();
+            throw;
         }
+    }
 
-        public void Add(string sql, DynamicParameters parameters)
+    public void Delete(string sql, object? parameters = null)
+    {
+        _dataToSave.Add((sql, parameters));
+    }
+
+    public ICollection<T> Get<T>(string query, object? parameters = null)
+    {
+        try
         {
-            try
+            if (_connection != null)
+            {
+                return _connection.Query<T>(query, parameters).ToList(); 
+            }
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                var dbResult = conn.Query<T>(query, parameters);
+                return dbResult.ToList();
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<ICollection<T>> GetAsync<T>(string query, object? parameters = null)
+    {
+        try
+        {
+            if (_connection != null)
+            {
+                var result = await _connection.QueryAsync<T>(query, parameters);
+                return result.ToList(); 
+            }
+
+            using (IDbConnection conn = new SqlConnection(_connectionString))
+            {
+                var dbResult = await conn.QueryAsync<T>(query, parameters);
+                return dbResult.ToList();
+            }
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public void SaveChanges()
+    {
+        try
+        {
+            if (_connection == null)
             {
                 _connection = new SqlConnection(_connectionString);
                 _connection.Open();
                 _currentTransacction = _connection.BeginTransaction();
-                _connection.Execute(sql, parameters, transaction: _currentTransacction);
             }
-            catch (Exception)
+            foreach (var data in _dataToSave)
             {
-                if (_currentTransacction != null)
-                {
-                    _currentTransacction.Rollback();
-                }
-                throw;
+                _currentTransacction.Connection.Execute(data.Item1, data.Item2, _currentTransacction);
             }
+            _currentTransacction.Commit();
         }
-
-        public void Delete(string sql, object? parameters = null)
+        catch (Exception)
         {
-            _dataToSave.Add((sql, parameters));
+            _currentTransacction?.Rollback();
+            throw;
         }
-
-        public ICollection<T> Get<T>(string query, object? parameters = null)
+        finally
         {
-            try
-            {
-                if (_connection != null)
-                {
-                    return _connection.Query<T>(query, parameters).ToList(); 
-                }
-                else
-                {
-                    using (IDbConnection conn = new SqlConnection(_connectionString))
-                    {
-                        var dbResult = conn.Query<T>(query, parameters);
-                        return dbResult.ToList();
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            Reset();
         }
+    }
 
-        public async Task<ICollection<T>> GetAsync<T>(string query, object? parameters = null)
+    public async Task SaveChangesAsync()
+    {
+        try
         {
-            try
+            if (_connection == null)
             {
-                if (_connection != null)
-                {
-                    var result = await _connection.QueryAsync<T>(query, parameters);
-                    return result.ToList(); 
-                }
-                else
-                {
-                    using (IDbConnection conn = new SqlConnection(_connectionString))
-                    {
-                        var dbResult = await conn.QueryAsync<T>(query, parameters);
-                        return dbResult.ToList();
-                    }
-                }
+                _connection = new SqlConnection(_connectionString);
+                _connection.Open();
+                _currentTransacction = _connection.BeginTransaction();
             }
-            catch (Exception)
+            foreach (var (item1, item2) in _dataToSave)
             {
-                throw;
+                await _currentTransacction.Connection.ExecuteAsync(item1, item2, _currentTransacction);
             }
+            _currentTransacction.Commit();   
         }
-
-        public void SaveChanges()
+        catch (Exception)
         {
-            try
-            {
-                if (_connection == null)
-                {
-                    _connection = new SqlConnection(_connectionString);
-                    _connection.Open();
-                    _currentTransacction = _connection.BeginTransaction();
-                }
-                foreach (var data in _dataToSave)
-                {
-                    _currentTransacction.Connection.Execute(data.Item1, data.Item2, transaction: _currentTransacction);
-                }
-                _currentTransacction.Commit();
-            }
-            catch (Exception)
-            {
-                if (_currentTransacction != null)
-                {
-                    _currentTransacction.Rollback();
-                }
-                throw;
-            }
-            finally
-            {
-                Reset();
-            }
+            _currentTransacction?.Rollback();
+            throw;             
         }
-
-        public async Task SaveChangesAsync()
+        finally
         {
-            try
-            {
-                if (_connection == null)
-                {
-                    _connection = new SqlConnection(_connectionString);
-                    _connection.Open();
-                    _currentTransacction = _connection.BeginTransaction();
-                }
-                foreach (var data in _dataToSave)
-                {
-                    await _currentTransacction.Connection.ExecuteAsync(data.Item1, data.Item2, transaction: _currentTransacction);
-                }
-                _currentTransacction.Commit();   
-            }
-            catch (Exception)
-            {
-                if (_currentTransacction != null)
-                {
-                    _currentTransacction.Rollback();
-                }
-                throw;             
-            }
-            finally
-            {
-                Reset();
-            }
+            Reset();
         }
+    }
 
-        public void Update<T>(string sql, T data)
-        {
-            if (data == null)
-                throw new NullReferenceException();
+    public void Update<T>(string sql, T data)
+    {
+        if (data == null)
+            throw new NullReferenceException();
 
-            _dataToSave.Add((sql, data));
-        }
+        _dataToSave.Add((sql, data));
+    }
 
-        /// <summary>
-        /// Resets the current state of the context.
-        /// </summary>
-        private void Reset()
-        {
-            _currentTransacction = null;
-            _dataToSave.Clear();
-            if (_connection != null && _connection.State == ConnectionState.Open)
-            {
-                _connection.Close();
-                _connection = null;
-            }
-        }
+    /// <summary>
+    /// Resets the current state of the context.
+    /// </summary>
+    private void Reset()
+    {
+        _currentTransacction = null;
+        _dataToSave.Clear();
+        if (_connection is not {State: ConnectionState.Open}) return;
+        _connection.Close();
+        _connection = null;
     }
 }
