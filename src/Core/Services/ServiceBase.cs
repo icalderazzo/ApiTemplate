@@ -52,9 +52,17 @@ namespace Core.Services
             }
         }
 
-        public Task<List<T>> GetAllAsync()
+        public async Task<List<T>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await _repository.GetAllAsync();
+                return result;
+            }
+            catch (Exception e)
+            {
+                throw;
+            }
         }
 
         public virtual T GetById(int id)

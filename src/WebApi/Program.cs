@@ -1,5 +1,4 @@
 using Serilog;
-using AutoMapper;
 using WebApi.Extensions.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
