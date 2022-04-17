@@ -1,4 +1,5 @@
 using Serilog;
+using AutoMapper;
 using WebApi.Extensions.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,9 @@ var logger = new LoggerConfiguration()
     .CreateLogger();
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(logger);
+
+// Mapper
+builder.Services.AddAutoMapper(typeof(Program));
 
 // Default api config
 builder.Services.AddControllers();
