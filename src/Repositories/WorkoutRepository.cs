@@ -7,7 +7,7 @@ namespace Repositories
     public class WorkoutRepository : RepositoryBase<Workout>, IWorkoutRepository
     {
         public WorkoutRepository(
-            IDbContext dbContext) : base(dbContext)
+            IDapperDatabaseInterface dbContext) : base(dbContext)
         {
 
         }

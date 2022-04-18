@@ -5,9 +5,9 @@ namespace Repositories
 {
     public class RepositoryBase<T> : IRepository<T>
     {
-        protected readonly IDbContext _dbContext;
+        protected readonly IDapperDatabaseInterface _dbContext;
         public RepositoryBase(
-            IDbContext dbContext)
+            IDapperDatabaseInterface dbContext)
         {
             _dbContext = dbContext;
         }

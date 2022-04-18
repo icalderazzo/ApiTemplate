@@ -8,7 +8,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\DapperDatabaseInterface\DapperDatabaseInterface.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ICalderazzo.DapperDatabaseInterface" Version="1.0.0" />
   </ItemGroup>
 
 </Project>
