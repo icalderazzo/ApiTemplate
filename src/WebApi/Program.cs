@@ -1,4 +1,5 @@
 using Serilog;
+using DapperDatabaseInterface;
 using WebApi.Extensions.Startup;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,8 +24,9 @@ builder.Services.AddSwaggerGen();
 
 // Database config
 builder.Services.AddDapperDatabaseInterface(
-    connectionString: builder.Configuration.GetConnectionString("Testing")
-);
+    Engine.SqlServer,
+    builder.Configuration.GetConnectionString("Testing")
+    );
 
 // Core services and repositories
 builder.Services.AddCoreServices();
